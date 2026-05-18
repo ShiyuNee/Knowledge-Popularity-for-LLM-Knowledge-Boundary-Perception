@@ -1,0 +1,1 @@
+python run_mmlu.py --source ./truthfulqa --type qa --ra none --outfile ./res/tq/zero-shot-hidden/ --n_shot 0 --model_path ../models/llama2-7B-chat --batch_size 2 --task tq --max_new_tokens 1 --output_states 1 --hidden_states 1
