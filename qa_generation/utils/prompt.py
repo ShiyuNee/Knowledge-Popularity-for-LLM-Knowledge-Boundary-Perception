@@ -1,4 +1,5 @@
 import json
+import os
 from transformers import AutoTokenizer
 
 def read_json(path):
@@ -187,7 +188,7 @@ if __name__ == '__main__':
     model_path  = '/path/to/your/model'   # 改成实际路径
     tokenizer   = AutoTokenizer.from_pretrained(model_path)
 
-    base_dir = '/Users/shiyuni/Documents/research/project/datasets'
+    base_dir = os.environ.get('QA_DATA_DIR', '/path/to/datasets')
     dataset  = 'nq'
     mode     = 'test'
     out_path = f'{base_dir}/{dataset}/multi_round/{dataset}_{mode}_{model_name}.jsonl'

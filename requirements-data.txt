@@ -1,0 +1,7 @@
+# Optional dependencies for Wikidata/Wikipedia preprocessing.
+-r requirements.txt
+SPARQLWrapper
+pyarrow
+pyahocorasick
+transformers
+huggingface_hub

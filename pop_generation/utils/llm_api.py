@@ -3,10 +3,14 @@ import time
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-os.environ['http_proxy'] = '127.0.0.1:7890'
-os.environ['https_proxy'] = '127.0.0.1:7890'
-openai.api_base = "https://api.chatanywhere.tech/v1"
-openai.api_key = "sk-REDACTED"  # remove real key when publishing
+# 通过环境变量配置 API（不要在此处硬编码密钥）：
+#   export OPENAI_API_KEY="sk-..."
+#   export OPENAI_BASE_URL="https://api.openai.com/v1"  # 可选；也可指向兼容代理端点
+# 如需代理，取消以下注释并填写代理地址：
+# os.environ['http_proxy'] = '127.0.0.1:7890'
+# os.environ['https_proxy'] = '127.0.0.1:7890'
+openai.api_base = os.environ.get("OPENAI_BASE_URL", "https://api.chatanywhere.tech/v1")
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 def get_res_from_chat(messages, args):
     max_tokens = 256 if args.type == 'paraphrase' else 16

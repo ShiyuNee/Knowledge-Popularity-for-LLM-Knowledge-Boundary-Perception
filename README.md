@@ -1,83 +1,248 @@
-# Knowledge-Popularity-for-LLM-Knowledge-Boundary-Perception
+# Popular but Wrong: Knowledge Popularity for LLM Knowledge-Boundary Perception
 
-本仓库配套论文与代码：用于研究大规模语言模型（LLM）知识边界感知与实体/知识流行度（popularity）相关的方法、数据生成与分析。
+Code, compact model outputs, and reproduction instructions for:
 
-**主要内容**
-- 论文：paper.md
-- 代码：`code/`（数据预处理、分析与绘图脚本）
-- QA 与生成：`qa_generation/`（基于 LLM 的 QA / 生成脚本）
-- LLM 输出：`llm_pop_generation/`（不同模型与参数下的生成结果）
-- 流行度生成工具：`pop_generation/`（解析与处理 LLM 输出的工具和 API）
-- 数据：`data/`（示例数据集，如篮球、电影、歌曲等）
-- 结果：`res/`（实验结果与汇总）
+> **Popular but Wrong: On the Knowledge Boundary of Large Language Models**
 
-## 目录结构（摘要）
-- code/
-  - analysis_correlation/: 相关性分析与绘图脚本
-  - my_utils/: 项目共用工具
-- qa_generation/: 生成 QA 与相关实验脚本
-- llm_pop_generation/: 不同数据集与模型的生成输出（jsonl）
-- pop_generation/: 解析 LLM 输出、运行 API 的脚本和工具
-- data/: 小型示例数据（jsonl）
-- res/: 实验结果与可视化输出
-- paper.md: 项目论文草稿
+This repository is designed as a reproduction guide. It supports two distinct
+goals:
 
-## 功能概览
-- 生成与收集：通过不同 LLM（ChatGPT、Llama、Qwen 等）采集生成结果并存储于 `llm_pop_generation/`。
-- 解析与聚合：`pop_generation/parse_llm_outputs.py` 提供解析 LLM 输出并将其转为可分析格式的工具。
-- QA 生成：`qa_generation/` 包含用于生成问题、运行评测与预处理的脚本。
-- 分析与绘图：`code/analysis_correlation/` 提供相关性分析与绘图脚本，用于生成论文图表。
+1. **Reproduce the paper's numerical results** from the released response
+   snapshots. This is the recommended route and does not require a GPU,
+   model weights, paid APIs, or a Wikipedia dump.
+2. **Regenerate the pipeline from source data** by rerunning model inference,
+   confidence baselines, Wikidata sitelink collection, Wikipedia
+   co-occurrence counting, and the final analyses.
 
-## 依赖与运行环境
-- 推荐 Python 3.8+ / 3.10
-- 常见依赖（示例）：
+The paper studies whether entity popularity and question–answer co-occurrence
+provide useful signals for detecting when an LLM is confidently wrong.
+
+## Recommended reproduction route
+
+### 1. Create the environment
+
+Python 3.10 is recommended. The analysis stages run on CPU.
 
 ```bash
-python -m pip install -r requirements.txt
-# 若无 requirements.txt，可安装常见包：
-python -m pip install numpy pandas matplotlib seaborn tqdm transformers
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-（如需环境文件，我可以为仓库生成 `requirements.txt` 或 `environment.yml`。）
+### 2. Prepare the released model outputs
 
-## 快速开始示例
-1. 克隆仓库并进入目录：
+The six compressed files in `data/model_outputs/` already contain every
+response-level value consumed by the reported analyses. Materialize the file
+layout expected by the original analysis scripts and validate it:
 
 ```bash
-git clone <your-repo-url>
-cd Knowledge-Popularity-for-LLM-Knowledge-Boundary-Perception
+python scripts/materialize_compact_data.py
+python scripts/verify_artifacts.py --level full
 ```
 
-2. 运行示例脚本（示例：解析 LLM 输出并生成统计）：
+A successful validation ends with:
+
+```text
+Artifact verification passed for level=full.
+```
+
+### 3. Run the paper analyses
 
 ```bash
-python pop_generation/parse_llm_outputs.py --input llm_pop_generation/basketball/ --output res/basketball_parsed.jsonl
+python scripts/reproduce.py --stage all
 ```
 
-3. 运行分析脚本生成图表：
+The complete CPU run can take tens of minutes. Every command writes an
+independent log under `reproduction_logs/`. To run or resume one part only:
 
 ```bash
-python code/analysis_correlation/acl_plot.py --input res/basketball_parsed.jsonl --out res/plots/
+python scripts/reproduce.py --stage core
+python scripts/reproduce.py --stage calibration
+python scripts/reproduce.py --stage distribution
+python scripts/reproduce.py --stage transfer
+python scripts/reproduce.py --stage figures
+python scripts/reproduce.py --stage check
 ```
 
-4. 若要启动本地 API（仓库中已有 run_api.sh）：
+Use `--dry-run` to inspect the commands without executing them.
+
+### 4. Validate the reproduced values
 
 ```bash
-bash pop_generation/run_api.sh
-# 或在需要时使用 run_api.py 启动服务
-python pop_generation/run_api.py
+python scripts/check_expected_results.py
 ```
 
-## 数据说明
-- `data/` 包含小型示例数据（jsonl 格式），用于快速测试脚本。
-- 真实或更大规模的数据应根据论文与实验需要另行下载并放置到合适路径，脚本中通常使用相对路径指向 `data/` 或 `llm_pop_generation/`。
+The checker validates the balanced calibration results, balanced-to-natural
+and natural-to-natural settings, final transfer matrices, and the 1,000-sample
+bootstrap configuration. A successful run ends with:
 
-## 贡献与沟通
-- 欢迎 Issue 与 PR。若要复现实验或运行脚本，建议先创建虚拟环境并安装依赖。
-- 如需我帮你添加 `requirements.txt`、CI 配置或示例运行 notebook，我可以继续实现。
+```text
+All reproduced values are within the documented tolerances.
+```
 
-## 许可证
-默认不包含 LICENSE，请根据需要补充（例如 MIT、Apache-2.0 等）。
+## Which command reproduces which result?
 
----
-（自动生成 README，如需调整语言风格、增加示例或补充依赖，请告诉我具体需求。）
+| Scientific question | Stage | Main output |
+|---|---|---|
+| How are popularity, confidence, and correctness related? | `core` | terminal/log output and `bootstrap_results.json` |
+| Does popularity improve knowledge-boundary detection? | `calibration` | `calibration_results.json` |
+| Does the method survive a balanced-to-natural prior shift? | `distribution` | `setting2_results.json` |
+| How does it perform under a natural train/test distribution? | `distribution` | `setting3_results.json` |
+| Does the predictor transfer across datasets and models? | `transfer` | `transfer_all_methods_v3_results.json` and `transfer_all_methods_setting3_results.json` |
+| Can the paper figures be regenerated? | `figures` | `code/analysis_correlation/paper_figures/` |
+
+Internal names such as `setting2` and `setting3` are retained for compatibility
+with the released scripts. Their semantic definitions are documented in
+[`docs/REPRODUCE.md`](docs/REPRODUCE.md).
+
+## Released reproduction data
+
+The repository contains three factual QA datasets:
+
+| Dataset | Relation | Questions |
+|---|---|---:|
+| Movies | movie → director | 10,964 |
+| Songs | song → performer | 2,157 |
+| Basketball | player → birthplace | 13,309 |
+
+It also contains one gzip-compressed JSONL file for each evaluated model:
+
+- Llama-3-8B-Instruct
+- Qwen2-7B-Instruct
+- GPT-3.5-Turbo
+- Qwen2.5-7B-Instruct
+- Qwen2.5-14B-Instruct
+- Qwen2.5-32B-Instruct
+
+Each model file contains all 26,430 questions. Important fields are:
+
+| Field group | Fields | Meaning |
+|---|---|---|
+| QA result | `question`, `reference`, `response`, `correct` | Input, accepted answer, generated answer, and correctness |
+| Token confidence | `confidence` | Mean probability of generated-answer tokens |
+| Wikidata popularity | `qpop`, `gt_pop`, `gene_pop` | Sitelink counts for question, ground-truth, and generated entities |
+| Wikipedia occurrence | `q_occ`, `gt_occ`, `gene_occ` | Documents containing each entity string |
+| Wikipedia co-occurrence | `gt_coo`, `gene_coo` | Documents containing both the question and answer entity |
+| Confidence baselines | `sc_confidence`, `vc_confidence` | Self-consistency and verbalized confidence |
+| LLM popularity estimates | `llm_qpop`, `llm_gene_pop`, `llm_coo` | Zero-shot model estimates on a 1–10 scale |
+
+See [`data/model_outputs/README.md`](data/model_outputs/README.md) for the
+complete schema.
+
+### Why Wikidata and Wikipedia are both used
+
+The primary single-entity popularity variables—`qpop`, `gt_pop`, and
+`gene_pop`—are Wikidata sitelink counts. They are cleaner than raw Wikipedia
+string counts for ambiguous aliases and common words.
+
+The Wikipedia counts `q_occ`, `gt_occ`, and `gene_occ` contain more string-match
+noise. They are retained for high-frequency filtering and
+relation-specificity normalization, not as the paper's primary entity
+popularity measure.
+
+Pairwise `gt_coo` and `gene_coo` must come from Wikipedia because Wikidata
+cannot measure how often two entities co-occur in natural-language documents.
+
+## Regenerating the pipeline from scratch
+
+Exact regeneration is more expensive and is not required for numerical
+verification of the paper.
+
+### Model responses
+
+Inference code for open-weight models is under `qa_generation/`. Install a
+CUDA-compatible PyTorch and vLLM build, then follow
+[`docs/REPRODUCE.md`](docs/REPRODUCE.md#5-regenerate-model-outputs-from-scratch).
+Hosted-model outputs may change when a provider updates a model or serving
+stack; use the released response snapshots when validating paper numbers.
+
+### Wikidata sitelinks and Wikipedia co-occurrence
+
+The parameterized preprocessing CLI can:
+
+1. extract all question, ground-truth, and generated entities;
+2. query Wikidata sitelink counts with retries and resume support;
+3. scan the English Wikipedia `20231101.en` parquet snapshot;
+4. build an entity-to-document index;
+5. calculate single-entity occurrence and pairwise co-occurrence; and
+6. attach the resulting fields to response rows.
+
+Install the additional dependencies and follow the dedicated guide:
+
+```bash
+pip install -r requirements-data.txt
+```
+
+See [`docs/BUILD_POPULARITY_FEATURES.md`](docs/BUILD_POPULARITY_FEATURES.md)
+for download links, commands, schemas, and matching rules.
+
+### Confidence and LLM-popularity baselines
+
+- `baselines/` contains self-consistency and verbalized-confidence generation.
+- `pop_generation/` contains zero-shot LLM popularity estimation.
+
+The expected filenames and commands are documented in
+[`docs/REPRODUCE.md`](docs/REPRODUCE.md).
+
+## Expected numerical behavior
+
+Deterministic statistical stages and the final distribution/transfer summaries
+should match the checked-in values. Neural calibration results can exhibit
+small library- or optimization-level variation. For example, the paper reports
+82.62% macro alignment for confidence plus generated-answer co-occurrence; the
+seed-42 public rerun gives 82.78%.
+
+Use [`docs/RESULTS.md`](docs/RESULTS.md) for the complete numerical checkpoints
+and [`docs/ROBUSTNESS_EXPERIMENTS.md`](docs/ROBUSTNESS_EXPERIMENTS.md) for the
+evaluation-setting and transfer-method map.
+
+## Large artifacts
+
+Multi-GB prompts, per-token traces, repeated sampling generations, judge
+reasoning, Wikipedia dumps, and entity-document indices are intentionally not
+stored in Git. They are not consumed by the recommended numerical reproduction
+route.
+
+See [`docs/DATA_AND_ARTIFACTS.md`](docs/DATA_AND_ARTIFACTS.md) for the exact
+artifact policy and the GitHub issue form for requesting redistributable raw
+snapshots. Model weights and Wikipedia dumps must be obtained from their
+original providers.
+
+## Repository layout
+
+```text
+.
+├── data/                         # QA datasets and compact response snapshots
+├── qa_generation/                # Open-weight and hosted-model inference
+├── baselines/                    # Self-consistency and verbalized confidence
+├── pop_generation/               # LLM-estimated popularity generation
+├── code/
+│   ├── analysis_correlation/     # Statistics, calibration, transfer, figures
+│   └── prepare_before_analysis/  # Wikidata/Wikipedia feature construction
+├── scripts/                      # Materialization, orchestration, validation
+├── tests/                        # External-feature pipeline tests
+└── docs/                         # Detailed reproduction guides
+```
+
+## Detailed documentation
+
+- [`docs/REPRODUCE.md`](docs/REPRODUCE.md): complete step-by-step commands
+- [`docs/RESULTS.md`](docs/RESULTS.md): expected values and output mapping
+- [`docs/BUILD_POPULARITY_FEATURES.md`](docs/BUILD_POPULARITY_FEATURES.md): external feature construction
+- [`docs/ROBUSTNESS_EXPERIMENTS.md`](docs/ROBUSTNESS_EXPERIMENTS.md): calibration, distribution, and transfer settings
+- [`docs/DATA_AND_ARTIFACTS.md`](docs/DATA_AND_ARTIFACTS.md): included and excluded artifacts
+- [`data/README.md`](data/README.md): source QA data
+- [`data/model_outputs/README.md`](data/model_outputs/README.md): compact response schema
+
+## Citation
+
+If this repository is useful, please cite the paper. The final BibTeX entry
+will be added after publication.
+
+## License
+
+Code is released under the [Apache License 2.0](LICENSE). Model weights,
+hosted-model outputs, Wikipedia/Wikidata resources, upstream datasets, and
+derived artifacts remain subject to their respective licenses and terms.
+

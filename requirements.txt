@@ -1,0 +1,16 @@
+# Core analysis & experiments
+numpy
+scipy
+pandas
+scikit-learn
+matplotlib
+torch
+openpyxl
+tqdm
+requests
+
+# API inference (ChatGPT experiments)
+openai
+
+# GPU inference for open-source models (optional, requires CUDA)
+# vllm

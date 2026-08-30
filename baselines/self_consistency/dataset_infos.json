@@ -1,0 +1,1 @@
+{"default": {"features": {"qa_prompt": {"_type": "Value"}, "Res": {"_type": "Value"}, "Log_p": {"_type": "Value"}, "question": {"_type": "Value"}, "has_answer": {"_type": "Value"}, "reference": {"_type": "Value"}}, "splits": {"train": {"name": "train", "dataset_name": "Knowledge-Popularity"}}}}

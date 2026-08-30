@@ -39,8 +39,8 @@ def copy_popularity_by_line(target_path, reference_path, output_path=None, popul
     return out_path
 
 
-for dataset in ['movies', 'songs', 'basketball']:
-    for model_name in ['Qwen2.5-7B', 'Qwen2.5-14B', 'Qwen2.5-32B']:
+for dataset in ['movies']:
+    for model_name in ['Qwen2.5-32B']:
         target = f'../../res/{dataset}/{dataset}_{model_name}_temperature1.jsonl'
         reference = f'../../res/{dataset}/{dataset}_qwen2_temperature1.jsonl'
         output = f'../../res/{dataset}/{dataset}_{model_name}_temperature1.jsonl'

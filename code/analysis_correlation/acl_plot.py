@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
@@ -571,7 +573,9 @@ def plot_line_between_pop_and_acc_conf_align(span_pop, span_acc, span_conf, alig
 
     # 显示图表
     # plt.show()
-    out_path=f'/Users/shiyuni/Documents/research/conference/EMNLP2026/knowledge_popularity/figs/question_pop_{model}_{dataset}.png'
+    output_dir = os.path.join(os.path.dirname(__file__), 'paper_figures')
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, f'question_pop_{model}_{dataset}.png')
     plt.savefig(out_path)
 
 def plot_spearman_gene_entity_acc():

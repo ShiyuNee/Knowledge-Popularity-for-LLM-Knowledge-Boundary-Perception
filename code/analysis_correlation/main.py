@@ -1,4 +1,3 @@
-from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 from tqdm import tqdm
 import time
@@ -514,7 +513,6 @@ class Postprocessor:
         question_single_occ = []
         gt_single_occ = []
         
-
         pattern = {
         'movies': 'Who is the director of the movie ',
         'songs': 'Who is the performer of the song ',
@@ -539,13 +537,19 @@ class Postprocessor:
             #     no_acc.append(item['has_answer'])
             #     continue
             # # 过滤single occr不合规的
+            # if gene_entity not in self.full_entities_dict:
+            #     continue
+            if gene_entity not in self.full_entities_dict or gene_entity.lower() not in co_occu[question_entity]:
+                continue
+            if self.full_entities_dict[ref]["popularity"] == "No":
+                continue
             if dataset in ['movies', 'songs'] and (
                 single_occr[question_entity.lower()] > 6000 or single_occr[gene_entity.lower()] > 6000 or single_occr[ref.lower()] > 6000
             ):
                 continue
             
             gene_pop = self.full_entities_dict[gene_entity]['popularity'] if self.full_entities_dict[gene_entity]['popularity'] != "No" else 0
-            ref_pop = self.full_entities_dict[ref]['popularity'] if self.full_entities_dict[ref]['popularity'] != "No" else 0
+            ref_pop = self.full_entities_dict[ref]['popularity']
             all_question_popularity.append(item['popularity'])
             # 计算confidence
             if 'gpt' in self.model:
@@ -560,11 +564,11 @@ class Postprocessor:
             # 基于wikidata统计的
             all_conf.append(temp_conf)
             all_acc.append(item['has_answer'])
-            all_gt_popularity.append(gene_pop)
+            all_gt_popularity.append(ref_pop)
             all_gene_popularity.append(gene_pop)
             # 基于wikipedia统计的共现次数
             cooccurance.append(co_occu[question_entity][gene_entity.lower()])
-            gt_cooccurance.append(co_occu[question_entity][gene_entity.lower()])
+            gt_cooccurance.append(co_occu[question_entity][ref.lower()])
             if item['has_answer'] == 0: # 做对的不用统计，因为gene和gt entity相同
                 # 统计做错部分,ref和gene entity的pop的差异
                 gene_wrong_gt_popularity.append(ref_pop)
@@ -796,14 +800,14 @@ def write_xlsx_with_header(data, path, datasets, models, types):
 
     header = ["Dataset", "Model"]
 
-    # corr部分
+    # corr部分 - 修改顺序：先按指标分组，再按类型分组，然后是该指标的平均值
     metrics = ["acc_corr", "conf_corr", "gap_corr"]
-    for t in types:
-        for m in metrics:
+    avg_metrics = ["avg_acc", "avg_conf", "avg_align"]
+    for idx, m in enumerate(metrics):
+        for t in types:
             header.append(f"{m}_{t}")
-
-    # 全局
-    header.extend(["avg_acc", "avg_conf", "avg_align"])
+        # 每个指标组后面加上对应的平均值
+        header.append(avg_metrics[idx])
 
     ws.append(header)
 
@@ -898,12 +902,15 @@ if __name__ == '__main__':
     types = ['question', 'gene', 'coo']
     for dataset in datasets:
         for model in models:
-            temp_spearman_acc = []
-            temp_spearman_conf = []
-            temp_spearman_gap = []
-            corr_part = []
-            avg_part = None
+            # 存储每个指标在不同type下的相关性
+            acc_corrs = []
+            conf_corrs = []
+            gap_corrs = []
+            avg_acc = None
+            avg_conf = None
+            avg_align = None
             for type in types:
+                print(f'dataset: {dataset}, model: {model}, type: {type}')
                 res_path = f'../../res/{dataset}/{dataset}_{model}_temperature1.jsonl'
                 # 从wikidata统计的
                 pop_path = f'../../res/gt_gene_entity_popularity_qwen2_llama3_chatgpt_qwen2.5_7b_14b_32b.jsonl'
@@ -916,20 +923,25 @@ if __name__ == '__main__':
                 res = P.get_correlation_between_gene_gt_entity(
                 dataset, type, cooccurrence_path, single_occurrence_path
                 )
-                # 前3个是相关性
-                corr_part.extend(res[:3])
+                # 前3个是相关性，按指标分组存储
+                acc_corrs.append(res[0])  # acc相关性
+                conf_corrs.append(res[1])  # conf相关性
+                gap_corrs.append(res[2])   # gap相关性
 
                 # 后3个是全局平均（只取一次）
-                if avg_part is None:
-                    avg_part = res[3:]
-            spearman_res.append(corr_part + list(avg_part))
+                if avg_acc is None:
+                    avg_acc = res[3]
+                    avg_conf = res[4]
+                    avg_align = res[5]
+            # 按指标顺序组织数据：acc相关性 + avg_acc, conf相关性 + avg_conf, gap相关性 + avg_align
+            spearman_res.append(acc_corrs + [avg_acc] + conf_corrs + [avg_conf] + gap_corrs + [avg_align])
                 # gt_pop = P.get_correlation_between_gene_gt_entity(dataset, type, cooccurrence_path, single_occurrence_path)
                 # plot_res.append(gt_pop)
     # plot_seaborn_boxplots(plot_res, ['Movies', 'Songs', 'Basketball'], 'Ground-Truth Answer Popularity')
     
     write_xlsx_with_header(
         spearman_res,
-        'spearmanr.xlsx',
+        'spearmanr_filte_ref.xlsx',
         datasets,
         models,
         types
