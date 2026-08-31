@@ -26,6 +26,9 @@ The public `data/model_outputs/` files are sufficient to reproduce the paper.
 They contain the model response, correctness, aggregated confidence, question
 popularity, ground-truth/generated-entity popularity, both co-occurrence
 values, occurrence counts used for filtering, and final SC/VC/LLM-pop scores.
+The complete field-level data dictionary, types, missing-value semantics, and
+loading example are documented in
+[`data/model_outputs/README.md`](../data/model_outputs/README.md).
 
 They omit bulky information that is not consumed by the reported analysis:
 full prompts, token IDs, per-token entropy, top-logprob dictionaries, repeated

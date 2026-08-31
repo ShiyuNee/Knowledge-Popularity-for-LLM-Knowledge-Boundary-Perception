@@ -13,23 +13,99 @@ basketball examples.
 | `qwen2.5-14b.jsonl.gz` | 26,430 | 1.5 MB |
 | `qwen2.5-32b.jsonl.gz` | 26,430 | 1.5 MB |
 
-Each row contains:
+## Row schema
 
-| Field | Meaning |
-|---|---|
-| `dataset`, `index` | Dataset identity and stable original row index |
-| `question`, `reference`, `response` | QA input, ground truth, and model answer |
-| `correct`, `confidence` | Exact-match correctness and mean answer-token probability |
-| `qpop` | Wikidata sitelink popularity of the question entity |
-| `gt_pop`, `gene_pop` | Wikidata popularity of the ground-truth and generated entities |
-| `gt_pop_found`, `gene_pop_found` | Whether each entity was found in the popularity resource |
-| `gt_coo` | Number of Wikipedia documents containing both the question entity and ground-truth answer entity |
-| `gene_coo` | Number of Wikipedia documents containing both the question entity and generated answer entity |
-| `q_occ` | Number of Wikipedia documents containing the question entity |
-| `gt_occ` | Number of Wikipedia documents containing the ground-truth answer entity |
-| `gene_occ` | Number of Wikipedia documents containing the generated answer entity |
-| `sc_confidence`, `vc_confidence` | Self-consistency and verbalized-confidence scores |
-| `llm_qpop`, `llm_gene_pop`, `llm_coo` | Zero-shot LLM-estimated popularity scores |
+Each line is one JSON object. `null` means that the corresponding upstream
+value was unavailable or could not be parsed; it does not mean zero.
+
+### Identity and QA fields
+
+| Field | JSON type | Allowed values | Description |
+|---|---|---|---|
+| `dataset` | string | `movies`, `songs`, `basketball` | Source dataset. |
+| `index` | integer | `0` to dataset size minus one | Zero-based row index within the dataset. The same `(dataset, index)` identifies the same question in every model archive. |
+| `question` | string | non-empty | Factual QA prompt. |
+| `reference` | array of strings | one or more answers | Accepted ground-truth answer aliases. |
+| `response` | string | model-generated text | The archived model answer. |
+| `correct` | integer | `0` or `1` | Whether the normalized tokens of any reference answer occur as a contiguous sequence in the response. Matching is case-insensitive and normalizes punctuation, articles, whitespace, and Unicode representation. |
+| `confidence` | number or `null` | `[0, 1]` | Arithmetic mean of the generated answer-token probabilities. `null` indicates missing token probabilities. |
+
+`correct` is a normalized containment score, not strict string equality. For
+example, an answer may contain additional text and still receive `1` when it
+contains a complete reference answer after normalization. Unicode text is
+normalized, but diacritics are not discarded; for example, `Eric` does not
+match `Éric` in the archived scoring rule.
+
+### Popularity and occurrence fields
+
+| Field | JSON type | Allowed values | Description |
+|---|---|---|---|
+| `qpop` | integer | `>= 0` | Number of Wikidata sitelinks for the question entity. |
+| `gt_pop` | integer | `>= 0` | Number of Wikidata sitelinks for the first ground-truth answer entity. |
+| `gene_pop` | integer | `>= 0` | Number of Wikidata sitelinks for the cleaned generated-answer entity. |
+| `gt_pop_found` | boolean | `true` or `false` | Whether the ground-truth entity was found in the popularity resource. |
+| `gene_pop_found` | boolean | `true` or `false` | Whether the generated entity was found in the popularity resource. |
+| `gt_coo` | integer or `null` | `>= 0` | Number of Wikipedia documents containing both the question entity and ground-truth answer entity. |
+| `gene_coo` | integer or `null` | `>= 0` | Number of Wikipedia documents containing both the question entity and generated-answer entity. |
+| `q_occ` | integer or `null` | `>= 0` | Number of Wikipedia documents containing the question entity. |
+| `gt_occ` | integer or `null` | `>= 0` | Number of Wikipedia documents containing the ground-truth answer entity. |
+| `gene_occ` | integer or `null` | `>= 0` | Number of Wikipedia documents containing the generated-answer entity. |
+
+When `gt_pop_found` or `gene_pop_found` is `false`, the corresponding compact
+popularity value is stored as `0`. Always use the `*_found` flag when you need
+to distinguish a missing entity from a genuine zero-valued count.
+
+### Confidence-baseline and estimated-popularity fields
+
+| Field | JSON type | Allowed values | Description |
+|---|---|---|---|
+| `sc_confidence` | number or `null` | `[0, 1]` | Self-consistency confidence derived from repeated generations. |
+| `vc_confidence` | number or `null` | `[0, 1]` | Verbalized-confidence score. |
+| `llm_qpop` | integer or `null` | `1` to `10` | Zero-shot LLM estimate of question-entity popularity. |
+| `llm_gene_pop` | integer or `null` | `1` to `10` | Zero-shot LLM estimate of generated-answer popularity. |
+| `llm_coo` | integer or `null` | `1` to `10` | Zero-shot LLM estimate of question/answer relation popularity. |
+
+## Example row
+
+```json
+{
+  "dataset": "movies",
+  "index": 0,
+  "question": "Who is the director of the movie The Intouchables",
+  "reference": ["Olivier Nakache", "Éric Toledano"],
+  "response": "Eric Toledano",
+  "correct": 0,
+  "confidence": 0.9888770878314972,
+  "qpop": 60,
+  "gt_pop": 15,
+  "gt_pop_found": true,
+  "gene_pop": 0,
+  "gene_pop_found": false,
+  "gt_coo": 9,
+  "gene_coo": 2,
+  "q_occ": 63,
+  "gt_occ": 32,
+  "gene_occ": 2,
+  "sc_confidence": 0.2,
+  "vc_confidence": 1.0,
+  "llm_qpop": 8,
+  "llm_gene_pop": 4,
+  "llm_coo": 8
+}
+```
+
+## Reading the archives
+
+```python
+import gzip
+import json
+
+path = "data/model_outputs/llama3-8b.jsonl.gz"
+with gzip.open(path, "rt", encoding="utf-8") as stream:
+    first_row = json.loads(next(stream))
+
+print(first_row["dataset"], first_row["confidence"])
+```
 
 ## Why entity popularity and co-occurrence use different sources
 
@@ -71,7 +147,7 @@ To create the legacy directory layout expected by the original analysis code:
 python scripts/materialize_compact_data.py
 ```
 
-To inspect a file without extracting it:
+To inspect a file from the shell without extracting it:
 
 ```bash
 gzip -cd data/model_outputs/llama3-8b.jsonl.gz | head -n 1
