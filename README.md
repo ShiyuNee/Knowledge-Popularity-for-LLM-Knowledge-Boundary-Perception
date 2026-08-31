@@ -1,8 +1,8 @@
-# How Knowledge Popularity Influences and Enhances LLM Knowledge Boundary Perception
+# Popular but Wrong: Understanding and Mitigating LLM Overconfidence through Knowledge Popularity
 
 Official code, compact model outputs, and reproduction instructions for
-[**How Knowledge Popularity Influences and Enhances LLM Knowledge Boundary
-Perception**](https://arxiv.org/abs/2505.17537).
+[**Popular but Wrong: Understanding and Mitigating LLM Overconfidence through
+Knowledge Popularity**](https://arxiv.org/abs/2505.17537).
 
 This repository is designed as a reproduction guide. It supports two distinct
 goals:
@@ -236,8 +236,8 @@ original providers.
 If this repository is useful, please cite the paper:
 
 ```bibtex
-@article{ni2025knowledge,
-  title={How Knowledge Popularity Influences and Enhances LLM Knowledge Boundary Perception},
+@article{ni2025popular,
+  title={Popular but Wrong: Understanding and Mitigating LLM Overconfidence through Knowledge Popularity},
   author={Ni, Shiyu and Bi, Keping and Guo, Jiafeng and Cheng, Xueqi},
   journal={arXiv preprint arXiv:2505.17537},
   year={2025}

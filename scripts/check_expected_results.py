@@ -16,9 +16,9 @@ CALIBRATION_EXPECTED = {
     "conf_isotonic": 77.08,
     "conf_mlp": 77.08,
     "conf+gene_coo_mlp": 82.62,
-    "conf+all_ext_mlp": 83.42,
+    "conf+all_ext_mlp": 83.72,
     "conf+llm_coo_pop_mlp": 78.15,
-    "conf+llm_all_mlp": 79.11,
+    "conf+llm_all_mlp": 79.02,
 }
 SETTING3_EXPECTED = {
     "iso": {

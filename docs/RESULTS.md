@@ -26,9 +26,9 @@ Expected paper values and reproducible checkpoints are shown below.
 | Isotonic regression | 77.08 |
 | Confidence MLP | 77.08 |
 | Confidence + external generated-entity co-occurrence | 82.62 |
-| Confidence + all external popularity features | 83.42 |
+| Confidence + all external popularity features | 83.72 |
 | Confidence + LLM-estimated co-occurrence popularity | 78.15 |
-| Confidence + all LLM-estimated popularity features | 79.11 |
+| Confidence + all LLM-estimated popularity features | 79.02 |
 
 The automated checker uses a documented tolerance for stochastic neural
 optimization.

@@ -1,8 +1,8 @@
 # Reproducing the Paper
 
-This guide reproduces the results of [**How Knowledge Popularity Influences and
-Enhances LLM Knowledge Boundary Perception**](https://arxiv.org/abs/2505.17537)
-from the public repository.
+This guide reproduces the results of [**Popular but Wrong: Understanding and
+Mitigating LLM Overconfidence through Knowledge
+Popularity**](https://arxiv.org/abs/2505.17537) from the public repository.
 
 There are three supported routes:
 
