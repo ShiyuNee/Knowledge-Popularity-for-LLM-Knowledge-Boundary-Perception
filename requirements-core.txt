@@ -1,0 +1,3 @@
+# Minimal dependencies for compact-data materialization and non-training analyses
+numpy
+scipy

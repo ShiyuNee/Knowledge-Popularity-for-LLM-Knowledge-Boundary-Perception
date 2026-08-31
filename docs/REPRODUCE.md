@@ -27,6 +27,14 @@ The analysis pipeline runs on CPU. GPU inference is only required when regenerat
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
+pip install -r requirements-core.txt
+```
+
+The compact no-training path needs only NumPy and SciPy. Before running the
+calibration, distribution, transfer, or figure stages, install the full
+analysis dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 

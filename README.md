@@ -4,37 +4,34 @@ Official code, compact model outputs, and reproduction instructions for
 [**Popular but Wrong: Understanding and Mitigating LLM Overconfidence through
 Knowledge Popularity**](https://arxiv.org/abs/2505.17537).
 
-This repository is designed as a reproduction guide. It supports two distinct
-goals:
+The recommended workflow uses the released response snapshots. It reproduces
+the paper's main statistics on CPU without model weights, paid APIs, a GPU, or
+a Wikipedia dump.
 
-1. **Reproduce the paper's numerical results** from the released response
-   snapshots. This is the recommended route and does not require a GPU,
-   model weights, paid APIs, or a Wikipedia dump.
-2. **Regenerate the pipeline from source data** by rerunning model inference,
-   confidence baselines, Wikidata sitelink collection, Wikipedia
-   co-occurrence counting, and the final analyses.
+## Choose a reproduction path
 
-The paper studies whether entity popularity and question–answer co-occurrence
-provide useful signals for detecting when an LLM is confidently wrong.
+| Goal | Requires training? | Hardware | Start here |
+|---|---:|---|---|
+| Verify the data and reproduce the paper's main statistical findings | No | CPU | [Quick start](#quick-start-no-training) |
+| Rerun calibration, distribution-shift, and transfer experiments | Yes | CPU + PyTorch | [Full analysis](#full-analysis-including-training) |
+| Regenerate model responses and popularity features | Yes | GPU and external data/services | [From-scratch regeneration](#from-scratch-regeneration) |
 
-## Recommended reproduction route
+## Quick start: no training
 
-### 1. Create the environment
-
-Python 3.10 is recommended. The analysis stages run on CPU.
+Python 3.10 is recommended. From a fresh clone:
 
 ```bash
+git clone https://github.com/ShiyuNee/Knowledge-Popularity-for-LLM-Knowledge-Boundary-Perception.git
+cd Knowledge-Popularity-for-LLM-Knowledge-Boundary-Perception
+
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements-core.txt
 ```
 
-### 2. Prepare the released model outputs
-
-The six compressed files in `data/model_outputs/` already contain every
-response-level value consumed by the reported analyses. Materialize the file
-layout expected by the original analysis scripts and validate it:
+Materialize the released compact snapshots and validate every required path
+and row count:
 
 ```bash
 python scripts/materialize_compact_data.py
@@ -47,41 +44,82 @@ A successful validation ends with:
 Artifact verification passed for level=full.
 ```
 
-### 3. Run the paper analyses
-
-```bash
-python scripts/reproduce.py --stage all
-```
-
-The complete CPU run can take tens of minutes. Every command writes an
-independent log under `reproduction_logs/`. To run or resume one part only:
+Run the non-training analyses used for the paper's main findings:
 
 ```bash
 python scripts/reproduce.py --stage core
-python scripts/reproduce.py --stage calibration
-python scripts/reproduce.py --stage distribution
-python scripts/reproduce.py --stage transfer
-python scripts/reproduce.py --stage figures
-python scripts/reproduce.py --stage check
 ```
 
-Use `--dry-run` to inspect the commands without executing them.
+This computes the per-model popularity/correctness/confidence statistics and
+1,000-sample bootstrap confidence intervals. Results are printed to the
+terminal, written to `reproduction_logs/`, and summarized in
+`code/analysis_correlation/bootstrap_results.json`.
 
-### 4. Validate the reproduced values
+Finally, verify that the checked-in calibration and transfer summaries are
+within the paper's documented tolerances:
 
 ```bash
 python scripts/check_expected_results.py
 ```
 
-The checker validates the balanced calibration results, balanced-to-natural
-and natural-to-natural settings, final transfer matrices, and the 1,000-sample
-bootstrap configuration. A successful run ends with:
+This last command validates released result files; it does not retrain the
+calibration models. A successful run ends with:
 
 ```text
 All reproduced values are within the documented tolerances.
 ```
 
-## Which command reproduces which result?
+The materialization step creates compatibility directories such as `res/`,
+`llm_pop_generation/`, and generated baseline files inside the clone. Reuse
+the same clone for later stages; rerunning materialization is safe.
+
+## Full analysis: including training
+
+Install the full analysis dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Then run only the stage you need:
+
+```bash
+python scripts/reproduce.py --stage calibration   # Table 5 calibration results
+python scripts/reproduce.py --stage distribution  # balanced/natural settings
+python scripts/reproduce.py --stage transfer      # cross-dataset/model transfer
+python scripts/reproduce.py --stage figures       # paper figures
+python scripts/reproduce.py --stage check         # numerical checkpoints
+```
+
+To run every stage, including training:
+
+```bash
+python scripts/reproduce.py --stage all
+```
+
+The complete CPU run can take tens of minutes or longer depending on hardware.
+Each command writes an independent log under `reproduction_logs/`, so failed or
+interrupted stages can be resumed individually. Use `--dry-run` to inspect the
+commands first.
+
+### Expected numerical variation
+
+Deterministic statistics should match the released values. MLP-based results
+may vary slightly with the PyTorch version, hardware, and random initialization.
+For reference, the released snapshot and arXiv v2 differ only slightly:
+
+| Method | arXiv v2 | Released snapshot |
+|---|---:|---:|
+| Confidence + generated-answer co-occurrence | 82.62 | 82.78 |
+| Confidence + all external popularity features | 83.72 | 83.84 |
+| Confidence + LLM-estimated co-occurrence | 78.15 | 78.01 |
+| Confidence + all LLM-estimated popularity features | 79.02 | 79.08 |
+
+These differences are below 0.2 percentage points and do not change the
+paper's conclusions or method ranking. The automated checker uses explicit
+tolerances for stochastic results.
+
+## Command-to-result map
 
 | Scientific question | Stage | Main output |
 |---|---|---|
@@ -144,7 +182,7 @@ popularity measure.
 Pairwise `gt_coo` and `gene_coo` must come from Wikipedia because Wikidata
 cannot measure how often two entities co-occur in natural-language documents.
 
-## Regenerating the pipeline from scratch
+## From-scratch regeneration
 
 Exact regeneration is more expensive and is not required for numerical
 verification of the paper.
@@ -185,14 +223,16 @@ for download links, commands, schemas, and matching rules.
 The expected filenames and commands are documented in
 [`docs/REPRODUCE.md`](docs/REPRODUCE.md).
 
-## Expected numerical behavior
+## Troubleshooting and detailed documentation
 
-Deterministic statistical stages and the final distribution/transfer summaries
-should match the checked-in values. Neural calibration results can exhibit
-small library- or optimization-level variation.
-
-Use [`docs/RESULTS.md`](docs/RESULTS.md) for the complete numerical checkpoints
-and evaluation-setting map.
+- If validation reports missing files, run
+  `python scripts/materialize_compact_data.py` before any analysis stage.
+- The no-training path needs only `requirements-core.txt`; PyTorch is required
+  only for calibration, distribution, and transfer stages.
+- Hosted-model outputs may change when providers update a model or serving
+  stack. Use the released snapshots when comparing against paper values.
+- Exact commands, schemas, expected outputs, and data provenance are documented
+  below.
 
 ## Large artifacts
 
