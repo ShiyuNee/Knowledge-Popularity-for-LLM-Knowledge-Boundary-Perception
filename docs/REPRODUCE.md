@@ -1,6 +1,8 @@
 # Reproducing the Paper
 
-This guide reproduces the results of **Popular but Wrong: On the Knowledge Boundary of Large Language Models** from the public repository.
+This guide reproduces the results of [**How Knowledge Popularity Influences and
+Enhances LLM Knowledge Boundary Perception**](https://arxiv.org/abs/2505.17537)
+from the public repository.
 
 There are three supported routes:
 
@@ -173,23 +175,7 @@ python scripts/check_expected_results.py
 
 Expected headline values and their output-file mapping are documented in [`RESULTS.md`](RESULTS.md).
 
-### 4.7 Optional historical scripts
-
-The final consolidated transfer experiments above supersede two earlier
-analysis scripts. They remain runnable for provenance and audit purposes:
-
-```bash
-python scripts/reproduce.py --stage historical
-```
-
-This optional stage writes `transfer_results.json` and
-`transfer_cross_relation_all_methods_results.json`. It is intentionally not
-included in `--stage all`, because it duplicates rather than extends the final
-Setting 1/2/3 transfer analysis. See
-[`ROBUSTNESS_EXPERIMENTS.md`](ROBUSTNESS_EXPERIMENTS.md) for the relationship
-between the historical and final outputs.
-
-### 4.8 Run the complete analysis pipeline
+### 4.7 Run the complete analysis pipeline
 
 Once the artifact verifier passes, all analysis stages can be launched with:
 

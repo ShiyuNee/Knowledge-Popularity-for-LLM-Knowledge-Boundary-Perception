@@ -15,7 +15,5 @@ The complete commands, Wikipedia snapshot, schemas, and methodological notes
 are documented in
 [`../../docs/BUILD_POPULARITY_FEATURES.md`](../../docs/BUILD_POPULARITY_FEATURES.md).
 
-The other Python files in this directory are retained as historical provenance
-for the original experiment workspace. They contain hard-coded cluster-era
-paths and should not be used as the public entry point.
-
+Legacy workspace-specific preprocessing scripts have been omitted from the
+public release.

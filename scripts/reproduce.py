@@ -52,16 +52,6 @@ STAGES = {
             ["code/analysis_correlation/transfer_all_methods_setting3.py"],
         ),
     ],
-    "historical": [
-        (
-            "historical_single_method_transfer",
-            ["code/analysis_correlation/transfer_experiment.py"],
-        ),
-        (
-            "historical_cross_relation_baselines",
-            ["code/analysis_correlation/transfer_cross_relation_all_methods.py"],
-        ),
-    ],
     "figures": [
         ("paper_figures", ["code/analysis_correlation/plot_paper_figures.py"]),
         (

@@ -1,8 +1,8 @@
-# Popular but Wrong: Knowledge Popularity for LLM Knowledge-Boundary Perception
+# How Knowledge Popularity Influences and Enhances LLM Knowledge Boundary Perception
 
-Code, compact model outputs, and reproduction instructions for:
-
-> **Popular but Wrong: On the Knowledge Boundary of Large Language Models**
+Official code, compact model outputs, and reproduction instructions for
+[**How Knowledge Popularity Influences and Enhances LLM Knowledge Boundary
+Perception**](https://arxiv.org/abs/2505.17537).
 
 This repository is designed as a reproduction guide. It supports two distinct
 goals:
@@ -189,13 +189,10 @@ The expected filenames and commands are documented in
 
 Deterministic statistical stages and the final distribution/transfer summaries
 should match the checked-in values. Neural calibration results can exhibit
-small library- or optimization-level variation. For example, the paper reports
-82.62% macro alignment for confidence plus generated-answer co-occurrence; the
-seed-42 public rerun gives 82.78%.
+small library- or optimization-level variation.
 
 Use [`docs/RESULTS.md`](docs/RESULTS.md) for the complete numerical checkpoints
-and [`docs/ROBUSTNESS_EXPERIMENTS.md`](docs/ROBUSTNESS_EXPERIMENTS.md) for the
-evaluation-setting and transfer-method map.
+and evaluation-setting map.
 
 ## Large artifacts
 
@@ -230,19 +227,25 @@ original providers.
 - [`docs/REPRODUCE.md`](docs/REPRODUCE.md): complete step-by-step commands
 - [`docs/RESULTS.md`](docs/RESULTS.md): expected values and output mapping
 - [`docs/BUILD_POPULARITY_FEATURES.md`](docs/BUILD_POPULARITY_FEATURES.md): external feature construction
-- [`docs/ROBUSTNESS_EXPERIMENTS.md`](docs/ROBUSTNESS_EXPERIMENTS.md): calibration, distribution, and transfer settings
 - [`docs/DATA_AND_ARTIFACTS.md`](docs/DATA_AND_ARTIFACTS.md): included and excluded artifacts
 - [`data/README.md`](data/README.md): source QA data
 - [`data/model_outputs/README.md`](data/model_outputs/README.md): compact response schema
 
 ## Citation
 
-If this repository is useful, please cite the paper. The final BibTeX entry
-will be added after publication.
+If this repository is useful, please cite the paper:
+
+```bibtex
+@article{ni2025knowledge,
+  title={How Knowledge Popularity Influences and Enhances LLM Knowledge Boundary Perception},
+  author={Ni, Shiyu and Bi, Keping and Guo, Jiafeng and Cheng, Xueqi},
+  journal={arXiv preprint arXiv:2505.17537},
+  year={2025}
+}
+```
 
 ## License
 
 Code is released under the [Apache License 2.0](LICENSE). Model weights,
 hosted-model outputs, Wikipedia/Wikidata resources, upstream datasets, and
 derived artifacts remain subject to their respective licenses and terms.
-

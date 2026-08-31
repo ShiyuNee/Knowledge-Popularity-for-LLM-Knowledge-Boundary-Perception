@@ -2,7 +2,7 @@
 analyze_dataset_statistics.py — 论文 Table 6/7 数据来源脚本
 
 【论文主要数据来源】
-本文 paper_demo.md §5.4 中的 Table 6（Intrinsic signal properties）和 Table 7（Signal→confidence associations）
+论文 §5.4 中的 Table 6（Intrinsic signal properties）和 Table 7（Signal→confidence associations）
 的数据均来自本脚本。本脚本与 verify_per_model.py 的区别在于：
   - verify_per_model.py 提供按 dataset×model 的偏相关分析（RQ1/RQ2/RQ3 核心统计）
   - 本脚本提供数据集固有属性的统计分析（不涉及模型行为的因果解释），以及补充的比值变量分析

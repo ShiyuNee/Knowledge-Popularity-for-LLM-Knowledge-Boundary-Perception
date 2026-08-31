@@ -114,7 +114,7 @@ def mlp_predict(model, X):
 
 
 def run_mlp_train_safe(X_train, y_train, hidden_dims=(128, 64, 32)):
-    """BatchNorm 安全的 MLP 训练函数（与 transfer_cross_relation_all_methods.py 一致）"""
+    """BatchNorm-safe MLP training for the transfer evaluation."""
     if len(X_train) > 100:
         X_tr, X_val, y_tr, y_val = train_test_split(X_train, y_train, test_size=0.1, random_state=SEED, stratify=y_train)
     else:

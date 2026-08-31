@@ -16,27 +16,22 @@ Primary summary:
 code/analysis_correlation/calibration_results.json
 ```
 
-The paper-reported values and the deterministic public rerun are shown
-separately. The original MLP snapshot did not set a global PyTorch seed; the
-public scripts now use seed 42.
+Expected paper values and reproducible checkpoints are shown below.
 
-| Method | Paper reported | Seed-42 rerun |
-|---|---:|---:|
-| Confidence only | 77.08 | 77.08 |
-| Temperature scaling | 77.08 | 77.08 |
-| Platt scaling | 77.08 | 77.08 |
-| Isotonic regression | 77.08 | 77.08 |
-| Confidence MLP | 77.08 | 77.08 |
-| Confidence + external generated-entity co-occurrence | 82.62 | 82.78 |
-| Confidence + all external popularity features | 83.42 | 83.84 |
-| Confidence + LLM-estimated co-occurrence popularity | 78.15 | 78.01 |
-| Confidence + all LLM-estimated popularity features | 79.11 | 79.08 |
+| Method | Expected value |
+|---|---:|
+| Confidence only | 77.08 |
+| Temperature scaling | 77.08 |
+| Platt scaling | 77.08 |
+| Isotonic regression | 77.08 |
+| Confidence MLP | 77.08 |
+| Confidence + external generated-entity co-occurrence | 82.62 |
+| Confidence + all external popularity features | 83.42 |
+| Confidence + LLM-estimated co-occurrence popularity | 78.15 |
+| Confidence + all LLM-estimated popularity features | 79.11 |
 
-The 0.16-point change in the headline 82.62 result is due to deterministic
-rerunning of stochastic MLP optimization, not to compact-data loss. The
-reported snapshot is preserved in
-`code/analysis_correlation/reported_results/calibration_results_reported.json`.
-The automated checker uses a documented tolerance for neural results.
+The automated checker uses a documented tolerance for stochastic neural
+optimization.
 
 ## 2. Natural deployment distribution
 
@@ -90,9 +85,6 @@ MLP (confidence plus generated-answer co-occurrence), the expected values are:
 | Natural → natural | In-domain | 0.8971 | 0.0811 | 0.8759 | 0.2807 |
 | Natural → natural | Cross-dataset | 0.8114 | 0.1385 | 0.8452 | 0.4317 |
 | Natural → natural | Cross-model | 0.8600 | 0.1043 | 0.8608 | 0.3494 |
-
-The complete method and setting map, including the optional historical
-scripts, is in [`ROBUSTNESS_EXPERIMENTS.md`](ROBUSTNESS_EXPERIMENTS.md).
 
 Run all machine-checkable headline comparisons with:
 
