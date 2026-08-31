@@ -136,37 +136,83 @@ with the released scripts. Their semantic definitions are documented in
 
 ## Released reproduction data
 
-The repository contains three factual QA datasets:
+The repository directly includes two analysis-ready data layers:
 
-| Dataset | Relation | Questions |
+1. three source factual-QA files under `data/`; and
+2. six compact model-output archives under `data/model_outputs/`.
+
+No additional download is needed for the recommended reproduction workflow.
+
+### Source QA datasets
+
+| File | Relation | Rows |
 |---|---|---:|
-| Movies | movie → director | 10,964 |
-| Songs | song → performer | 2,157 |
-| Basketball | player → birthplace | 13,309 |
+| `data/movies.jsonl` | movie → director | 10,964 |
+| `data/songs.jsonl` | song → performer | 2,157 |
+| `data/basketball.jsonl` | basketball player → birthplace | 13,309 |
 
-It also contains one gzip-compressed JSONL file for each evaluated model:
+Each line is a JSON object with the following fields:
 
-- Llama-3-8B-Instruct
-- Qwen2-7B-Instruct
-- GPT-3.5-Turbo
-- Qwen2.5-7B-Instruct
-- Qwen2.5-14B-Instruct
-- Qwen2.5-32B-Instruct
-
-Each model file contains all 26,430 questions. Important fields are:
-
-| Field group | Fields | Meaning |
+| Field | Type | Description |
 |---|---|---|
-| QA result | `question`, `reference`, `response`, `correct` | Input, accepted answer, generated answer, and correctness |
-| Token confidence | `confidence` | Mean probability of generated-answer tokens |
-| Wikidata popularity | `qpop`, `gt_pop`, `gene_pop` | Sitelink counts for question, ground-truth, and generated entities |
-| Wikipedia occurrence | `q_occ`, `gt_occ`, `gene_occ` | Documents containing each entity string |
-| Wikipedia co-occurrence | `gt_coo`, `gene_coo` | Documents containing both the question and answer entity |
-| Confidence baselines | `sc_confidence`, `vc_confidence` | Self-consistency and verbalized confidence |
-| LLM popularity estimates | `llm_qpop`, `llm_gene_pop`, `llm_coo` | Zero-shot model estimates on a 1–10 scale |
+| `question` | string | Natural-language factual question. |
+| `reference` | array of strings | One or more accepted answer aliases. |
+| `popularity` | integer | Wikidata sitelink count for the question entity. |
+| `question_entity` | string | Subject entity mentioned in the question. |
+
+### Compact model-output data
+
+The repository contains one gzip-compressed JSONL file for each evaluated
+model. Every archive has 26,430 rows and combines all three QA datasets.
+
+| File | Model | Rows |
+|---|---|---:|
+| `data/model_outputs/llama3-8b.jsonl.gz` | Llama-3-8B-Instruct | 26,430 |
+| `data/model_outputs/qwen2-7b.jsonl.gz` | Qwen2-7B-Instruct | 26,430 |
+| `data/model_outputs/gpt-3.5-turbo.jsonl.gz` | GPT-3.5-Turbo | 26,430 |
+| `data/model_outputs/qwen2.5-7b.jsonl.gz` | Qwen2.5-7B-Instruct | 26,430 |
+| `data/model_outputs/qwen2.5-14b.jsonl.gz` | Qwen2.5-14B-Instruct | 26,430 |
+| `data/model_outputs/qwen2.5-32b.jsonl.gz` | Qwen2.5-32B-Instruct | 26,430 |
+
+Each line is one JSON object with the following complete schema:
+
+| Field | Type / range | Description |
+|---|---|---|
+| `dataset` | string | Source dataset: `movies`, `songs`, or `basketball`. |
+| `index` | integer | Zero-based row index within the source dataset. `(dataset, index)` identifies the same question across model archives. |
+| `question` | string | Factual QA prompt. |
+| `reference` | array of strings | Accepted ground-truth answer aliases. |
+| `response` | string | Archived model-generated answer. |
+| `correct` | integer, `0` or `1` | Whether a normalized reference answer occurs as a contiguous token sequence in the response. |
+| `confidence` | number in `[0, 1]`, or `null` | Mean probability of the generated answer tokens. |
+| `qpop` | integer, `>= 0` | Wikidata sitelink count for the question entity. |
+| `gt_pop` | integer, `>= 0` | Wikidata sitelink count for the first ground-truth answer entity. |
+| `gene_pop` | integer, `>= 0` | Wikidata sitelink count for the cleaned generated-answer entity. |
+| `gt_pop_found` | boolean | Whether the ground-truth entity was found in the popularity resource. |
+| `gene_pop_found` | boolean | Whether the generated entity was found in the popularity resource. |
+| `q_occ` | integer `>= 0`, or `null` | Number of Wikipedia documents containing the question entity. |
+| `gt_occ` | integer `>= 0`, or `null` | Number of Wikipedia documents containing the ground-truth entity. |
+| `gene_occ` | integer `>= 0`, or `null` | Number of Wikipedia documents containing the generated entity. |
+| `gt_coo` | integer `>= 0`, or `null` | Wikipedia documents containing both the question and ground-truth entities. |
+| `gene_coo` | integer `>= 0`, or `null` | Wikipedia documents containing both the question and generated entities. |
+| `sc_confidence` | number in `[0, 1]`, or `null` | Self-consistency confidence from repeated generations. |
+| `vc_confidence` | number in `[0, 1]`, or `null` | Verbalized-confidence score. |
+| `llm_qpop` | integer from `1` to `10`, or `null` | Zero-shot LLM estimate of question-entity popularity. |
+| `llm_gene_pop` | integer from `1` to `10`, or `null` | Zero-shot LLM estimate of generated-answer popularity. |
+| `llm_coo` | integer from `1` to `10`, or `null` | Zero-shot LLM estimate of question/answer relation popularity. |
+
+`null` means that an upstream value was unavailable or could not be parsed; it
+does not mean zero. When `gt_pop_found` or `gene_pop_found` is `false`, the
+corresponding compact popularity value is stored as `0`, so use the flag to
+distinguish a missing entity from a genuine zero count.
+
+The `correct` field uses normalized containment rather than strict string
+equality. Matching is case-insensitive and normalizes punctuation, articles,
+whitespace, and Unicode representation, while preserving diacritics.
 
 See [`data/model_outputs/README.md`](data/model_outputs/README.md) for the
-complete schema.
+same schema with an example row and loading code, and [`data/README.md`](data/README.md)
+for the source QA format.
 
 ### Why Wikidata and Wikipedia are both used
 
