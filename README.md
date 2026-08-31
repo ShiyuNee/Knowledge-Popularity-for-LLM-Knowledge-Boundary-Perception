@@ -1,7 +1,7 @@
 # Popular but Wrong: Understanding and Mitigating LLM Overconfidence through Knowledge Popularity
 
 Official code, compact model outputs, and reproduction instructions for
-[**Popular but Wrong: Understanding and Mitigating LLM Overconfidence through
+EMNLP2026: [**Popular but Wrong: Understanding and Mitigating LLM Overconfidence through
 Knowledge Popularity**](https://arxiv.org/abs/2505.17537).
 
 The recommended workflow uses the released response snapshots. It reproduces
