@@ -275,8 +275,8 @@ dumps must be obtained from their original providers.
 If this repository is useful, please cite the paper:
 
 ```bibtex
-@article{ni2025popular,
-  title={Popular but Wrong: Understanding and Mitigating LLM Overconfidence through Knowledge Popularity},
+@article{ni2025knowledge,
+  title={How knowledge popularity influences and enhances llm knowledge boundary perception},
   author={Ni, Shiyu and Bi, Keping and Guo, Jiafeng and Cheng, Xueqi},
   journal={arXiv preprint arXiv:2505.17537},
   year={2025}
