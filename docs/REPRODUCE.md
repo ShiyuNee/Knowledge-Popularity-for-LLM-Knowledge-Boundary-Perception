@@ -4,18 +4,15 @@ This guide reproduces the results of [**Popular but Wrong: Understanding and
 Mitigating LLM Overconfidence through Knowledge
 Popularity**](https://arxiv.org/abs/2505.17537) from the public repository.
 
-There are three supported routes:
+There are two supported routes:
 
 1. **Compact reproduction (recommended):** use the six model-level archives
    committed under `data/model_outputs/`. They contain all response-level
    values required by the paper analyses.
-2. **Full raw-artifact reproduction:** request the multi-GB snapshot when
-   per-token traces, sampled answers, or intermediate popularity indices are
-   required for an audit.
-3. **From-scratch regeneration:** rerun model inference and rebuild popularity
+2. **From-scratch regeneration:** rerun model inference and rebuild popularity
    features before running the same analysis pipeline.
 
-The first two routes recover the paper numbers. Hosted APIs, model-serving
+The compact route recovers the paper numbers. Hosted APIs, model-serving
 libraries, and Wikipedia/Wikidata snapshots can change over time, so newly
 generated outputs may differ slightly.
 
@@ -107,11 +104,6 @@ python scripts/verify_artifacts.py --level full
 
 The verifier checks all required paths and exact row counts. A successful run
 ends with `Artifact verification passed`.
-
-For the optional full raw snapshot, follow
-[`DATA_AND_ARTIFACTS.md`](DATA_AND_ARTIFACTS.md). Extracting it into the
-repository root replaces the minimized compatibility files with raw records but
-does not change the analysis commands.
 
 ## 4. Reproduce the reported results
 

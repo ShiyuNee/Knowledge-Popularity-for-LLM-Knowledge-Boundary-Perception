@@ -14,5 +14,5 @@ entity, and its Wikidata sitelink-based popularity.
 Model responses, token probabilities, Wikipedia co-occurrence indices, and
 baseline generations are released in a minimized, analysis-ready form under
 [`model_outputs/`](model_outputs/). See
-[`docs/DATA_AND_ARTIFACTS.md`](../docs/DATA_AND_ARTIFACTS.md) for the difference
-between these compact public files and the optional full raw snapshot.
+[`docs/DATA_AND_ARTIFACTS.md`](../docs/DATA_AND_ARTIFACTS.md) for the compact
+schema, excluded large artifacts, and regeneration instructions.

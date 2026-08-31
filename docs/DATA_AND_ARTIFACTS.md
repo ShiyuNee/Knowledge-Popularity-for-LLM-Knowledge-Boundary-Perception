@@ -65,30 +65,11 @@ before the analysis. The following raw resources are therefore optional.
 | Llama/Qwen model weights | many GB | Distributed by the model providers under their own licenses |
 | OpenAI API responses | variable | Generated through a paid third-party API |
 
-These paths are ignored by Git. Do not use `git add -f` to commit them.
-
-## Obtaining the full raw experiment snapshot
-
-The full per-example raw artifact snapshot is not stored in Git because of its
-size and because some outputs are governed by third-party model or API terms.
-It is not required for reproducing the paper's numerical results.
-
-To request the snapshot:
-
-1. Open a GitHub issue in this repository with the title
-   **"Artifact snapshot request"**. The repository provides a dedicated issue
-   form for this request.
-2. State which artifact groups you need:
-   `res`, `llm_pop_generation`, `self_consistency`, or
-   `verbalized_confidence`.
-3. Include the paper version or commit hash you are reproducing.
-
-The authors will provide an external transfer location when redistribution is
-permitted. Model checkpoints and the raw Wikipedia dump are never redistributed
-by this project; obtain them directly from their original providers.
-
-If an archival DOI or release URL becomes available, it will be added to this
-file. Treat this file as the canonical artifact-availability statement.
+These raw artifacts are not part of the public release and are not required to
+reproduce the paper's reported results. The compact files under
+`data/model_outputs/` contain the response-level fields consumed by the public
+analysis pipeline. Model checkpoints and the raw Wikipedia dump must be
+obtained directly from their original providers.
 
 ## Regenerating the artifacts
 

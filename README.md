@@ -242,9 +242,8 @@ stored in Git. They are not consumed by the recommended numerical reproduction
 route.
 
 See [`docs/DATA_AND_ARTIFACTS.md`](docs/DATA_AND_ARTIFACTS.md) for the exact
-artifact policy and the GitHub issue form for requesting redistributable raw
-snapshots. Model weights and Wikipedia dumps must be obtained from their
-original providers.
+artifact policy and regeneration instructions. Model weights and Wikipedia
+dumps must be obtained from their original providers.
 
 ## Repository layout
 
